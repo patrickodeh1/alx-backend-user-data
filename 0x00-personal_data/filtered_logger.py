@@ -2,8 +2,11 @@
 """Regex: Returning log messages"""
 
 import re
-from typing import List
+from typing import List, Tuple
 import logging
+
+PII_FIELDS: Tuple[str, ...] = ("name", "email",
+                               "phone", "ssn", "password")
 
 
 class RedactingFormatter(logging.Formatter):
@@ -32,3 +35,18 @@ def filter_datum(fields: List[str], redaction: str,
     """Obfuscates specified fields in a log message."""
     return re.sub(rf"({'|'.join(fields)})=[^{separator}]+",
                   lambda m: f"{m.group(1)}={redaction}", message)
+
+
+def get_logger() -> logging.Logger:
+    """Creates and configures the logger."""
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    stream_handler = logging.StreamHandler()
+    formatter = RedactingFormatter(fields=PII_FIELDS)
+    stream_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+
+    return logger

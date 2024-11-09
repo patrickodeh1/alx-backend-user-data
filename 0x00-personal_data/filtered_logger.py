@@ -2,8 +2,11 @@
 """Regex: Returning log messages"""
 
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import logging
+import os
+import mysql.connector
+from mysql.connector import connection
 
 PII_FIELDS: Tuple[str, ...] = ("name", "email",
                                "phone", "ssn", "password")
@@ -50,3 +53,23 @@ def get_logger() -> logging.Logger:
     logger.addHandler(stream_handler)
 
     return logger
+
+
+def get_db() -> connection.MySQLConnection:
+    """
+    Connects to a secure database using credentials from environment variables.
+
+    Returns:
+        mysql.connector.connection.MySQLConnection:
+    """
+    db_username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    db_password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    db_host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    db_name = os.getenv("PERSONAL_DATA_DB_NAME")
+
+    return mysql.connector.connect(
+        user=db_username,
+        password=db_password,
+        host=db_host,
+        database=db_name
+    )

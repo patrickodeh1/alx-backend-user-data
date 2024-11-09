@@ -77,3 +77,38 @@ def get_db() -> connection.MySQLConnection:
         host=db_host,
         database=db_name
     )
+
+
+def main() -> None:
+    """Main function to fetch users from the database and log them."""
+    # Set up the logger with RedactingFormatter
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    formatter = RedactingFormatter(PII_FIELDS)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.propagate = False
+
+    # Connect to the database
+    db = get_db()
+    cursor = db.cursor()
+
+    # Retrieve all rows from the users table
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+
+    # Log each row with filtered format
+    for row in rows:
+        log_message = f"name={row[0]}; email={row[1]}; phone={row[2]}; \
+            ssn={row[3]}; password={row[4]}; ip={row[5]}; \
+                last_login={row[6]}; user_agent={row[7]}"
+        logger.info(log_message)
+
+    # Close the database connection
+    cursor.close()
+    db.close()
+
+
+if __name__ == "__main__":
+    main()

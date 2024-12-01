@@ -1,53 +1,75 @@
 #!/usr/bin/env python3
 """
-Route module for the API
+Route module for the API.
 
-This module sets up the Flask application, registers blueprints,
-handles CORS configuration, and includes custom error handlers
-for the API. The application listens on a host and port defined
-via environment variables or defaults to 0.0.0.0:5000.
+This module defines the main entry point for the Flask API application.
+It initializes the Flask app, registers blueprints, configures CORS,
+and provides custom error handlers for 401 and 404 HTTP errors.
+The API serves as the backend for the application, enabling interactions
+with various services.
 """
+
 from os import getenv
 from flask import Flask, jsonify, Response
 from flask_cors import CORS
 from api.v1.views import app_views
 
-# Initialize Flask application
+# Initialize the Flask application
 app = Flask(__name__)
 
 # Register the app_views blueprint with a URL prefix
 app.register_blueprint(app_views, url_prefix='/api/v1')
 
-# Configure Cross-Origin Resource Sharing (CORS) for the API
+# Configure CORS to allow access from any origin for routes under /api/v1
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 
-# Error handler for 401 Unauthorized
 @app.errorhandler(401)
 def unauthorized(error) -> Response:
     """
-    Custom handler for 401 Unauthorized errors.
+    Handle 401 Unauthorized HTTP errors.
+
+    This function provides a JSON response with an appropriate
+    error message when a 401 error is raised. It is used to signal
+    that the client is not authorized to access the requested resource.
+
+    Args:
+        error: The error object containing details about the 401 error.
+
     Returns:
-        JSON response with error message and 401 status code.
+        A tuple containing a JSON response with an error message and
+        the HTTP status code 401.
     """
     return jsonify({"error": "Unauthorized"}), 401
 
 
-# Error handler for 404 Not Found
 @app.errorhandler(404)
 def not_found(error) -> Response:
     """
-    Custom handler for 404 Not Found errors.
+    Handle 404 Not Found HTTP errors.
+
+    This function provides a JSON response with an appropriate
+    error message when a 404 error is raised. It is used to signal
+    that the requested resource was not found on the server.
+
+    Args:
+        error: The error object containing details about the 404 error.
+
     Returns:
-        JSON response with error message and 404 status code.
+        A tuple containing a JSON response with an error message and
+        the HTTP status code 404.
     """
     return jsonify({"error": "Not found"}), 404
 
 
-# Main entry point for running the Flask application
 if __name__ == "__main__":
-    # Get host and port from environment variables, with defaults
+    """
+    Main entry point of the application.
+
+    This block retrieves the host and port from environment variables
+    (with default values of 0.0.0.0 and 5000, respectively), and starts
+    the Flask application to listen for incoming requests.
+    """
     host = getenv("API_HOST", "0.0.0.0")
     port = getenv("API_PORT", "5000")
-    # Run the Flask application
     app.run(host=host, port=port)

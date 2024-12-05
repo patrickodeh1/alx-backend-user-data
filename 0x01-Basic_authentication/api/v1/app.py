@@ -57,6 +57,25 @@ def not_found(error) -> Response:
     return jsonify({"error": "Not found"}), 404
 
 
+def _get_data_for_json(self):
+    """
+    Retrieves data for JSON serialization.
+
+    This method is used internally to process and return
+    data formatted for JSON responses.
+
+    Returns:
+        dict: The data prepared for JSON serialization.
+    """
+    if self.is_json:
+        return self.get_json()
+    else:
+        try:
+            return {"data": self.data.decode("utf-8")}
+        except Exception:
+            return {"error": "Response data is not JSON serializable"}
+
+
 if __name__ == "__main__":
     """
     Main entry point of the application.

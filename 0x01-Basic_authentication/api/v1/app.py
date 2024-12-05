@@ -14,13 +14,8 @@ from flask import Flask, jsonify, Response
 from flask_cors import CORS
 from api.v1.views import app_views
 
-# Initialize the Flask application
 app = Flask(__name__)
-
-# Register the app_views blueprint with a URL prefix
 app.register_blueprint(app_views, url_prefix='/api/v1')
-
-# Configure CORS to allow access from any origin for routes under /api/v1
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 
